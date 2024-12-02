@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frequency Level Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="background-image: url('er.jpg');">
+    <div class="container">
+        <h1>Hearing Test Frequency and Level Chart</h1>
+        
+        <!-- Canvas for chart -->
+        <canvas id="frequencyChart" width="600" height="400"></canvas>
+        
+        <div>
+            <label for="frequencyInput">Frequency (Hz): </label>
+            <input type="number" id="frequencyInput" value="1000" min="20" max="20000" step="1">
+            
+            <label for="levelInput">Level: </label>
+            <input type="number" id="levelInput" value="50" min="0" max="100" step="1">
+            
+            <button onclick="addData()">Add Data</button>
+        </div>
+    </div>
+
+    <script>
+        // Create the chart instance
+        const ctx = document.getElementById('frequencyChart').getContext('2d');
+        const frequencyChart = new Chart(ctx, {
+            type: 'line', // Line chart
+            data: {
+                labels: [], // Frequency labels
+                datasets: [{
+                    label: 'Frequency vs Level',
+                    data: [], // Frequency and corresponding level data
+                    borderColor: 'rgba(75, 192, 192, 1)', // Line color
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Frequency (Hz)'
+                        },
+                        min: 20,
+                        max: 20000,
+                        type: 'logarithmic' // Logarithmic scale for frequencies
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Level'
+                        },
+                        min: 0,
+                        max: 100 // assuming a level range from 0 to 100
+                    }
+                }
+            }
+        });
+
+        // Function to add frequency and level data to the chart
+        function addData() {
+            const frequency = document.getElementById('frequencyInput').value;
+            const level = document.getElementById('levelInput').value;
+
+            // Add data to chart
+            frequencyChart.data.labels.push(frequency);
+            frequencyChart.data.datasets[0].data.push(level);
+
+            // Update the chart
+            frequencyChart.update();
+        }
+    </script>
+</body>
+</html>

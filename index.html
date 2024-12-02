@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Hearing Test / Audio Oscillator</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+       
+        <body style="background-image: url('er.jpg'); background-size: cover; background-position: center center; background-repeat: no-repeat; height: 100vh;">
+
+        <a class="navbar-brand" href="javascript:SwapDivs('app','info')">Hearing Test / Audio Oscillator</a>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="location.html" style="color:white;">Location</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="chart.html" style="color:white;">Chart</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container divMargin h-100">
+        <!-- Instructions -->
+        <div class="para1">
+            <h2>Instruction to use</h2>
+            <ul>
+                <li>Ensure that the testing environment is quiet to minimize external interference.</li>
+                <li>Instruct the participant to wear headphones or earphones for accurate sound delivery.</li>
+                <li>Start with the lowest frequency range, from 200Hz to 250Hz.</li>
+                <li>
+                    Gradually increase the volume of the pure tone until it is clearly audible to the participant.
+                    Record the lowest intensity level (in decibels) at which the participant can reliably hear the tone.
+                </li>
+                <li>
+                    Repeat steps for each frequency range: 250Hz to 500Hz, 500Hz to 750Hz, and so on up to 1500Hz.
+                </li>
+                <li>
+                    If the frequency level is above 500Hz, consult a doctor.
+                </li>
+                <li>
+                    Consult with a qualified doctor (refer to our location for hospital details) to interpret the results
+                    and provide appropriate recommendations or interventions based on the findings.
+                </li>
+            </ul>
+        </div>
+
+        <!-- Hearing Test Controls -->
+        <div id="app" style="display:block;" class="box2">
+            <!-- Stereo Panning Control -->
+            <div id="stereo_panning_control" class="cent box text-center">
+                <p>HEARING TEST</p>
+                <input class="panning-control cent" type="range" min="-1" max="1" step="0.1" value="0">
+                <span class="panning-value"> 0 </span>
+                <br>
+                <button class="btn btn-outline-dark" onclick="LeftSpeaker()">LEFT HEAR</button>
+                <button class="btn btn-outline-dark" onclick="CenterAudio()">BOTH</button>
+                <button class="btn btn-outline-dark" onclick="RightSpeaker()">RIGHT HEAR</button>
+            </div>
+
+            <!-- Frequency Control -->
+            <div id="frequency_control_block" class="cent box text-center">
+                <p>Frequency</p>
+                <input type="text" style="width: 20%;" class="text-center" id="Frequency_Input" value="440"
+                    onchange="SetFrequencySlider(this)" /> hz
+                <br>
+                <input type="range" min="1" max="20154" oninput="FrequencySlider(this)" value="440"
+                    class="slider-control cent" id="Frequency_Slider" />
+            </div>
+
+            <!-- Waveform Selection -->
+            <div id="waveform" class="cent box text-center">
+                <p>Waveform type</p>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    <label class="btn btn-outline-dark active">
+                        <input type="radio" name="waveformRadioButton" checked onclick="ChangeWaveformType(this);"
+                            value="sine" /> Sine
+                    </label>
+                    <label class="btn btn-outline-dark">
+                        <input type="radio" name="waveformRadioButton" onclick="ChangeWaveformType(this);"
+                            value="square" /> Square
+                    </label>
+                    <label class="btn btn-outline-dark">
+                        <input type="radio" name="waveformRadioButton" onclick="ChangeWaveformType(this);"
+                            value="sawtooth" /> Sawtooth
+                    </label>
+                    <label class="btn btn-outline-dark">
+                        <input type="radio" name="waveformRadioButton" onclick="ChangeWaveformType(this);"
+                            value="triangle" /> Triangle
+                    </label>
+                </div>
+            </div>
+
+            <!-- Volume Control -->
+            <div id="volume_control" class="cent box text-center">
+                <p>Volume</p>
+                <input class="volume-control cent" type="range" min="0" max="1" step="0.01" value="0.5">
+                <span class="volume-value">50%</span>
+            </div>
+
+            <!-- Play/Stop Buttons -->
+            <div id="switch_ON/OFF" class="cent box text-center">
+                <button class="btn btn-outline-dark" onclick="Play_Button()">Play</button>
+                <button class="btn btn-outline-dark" onclick="Stop_Button()">Stop</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Code -->
+    <script>
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let panner;
+
+        const frequencyInput = document.getElementById("Frequency_Input");
+        const frequencySlider = document.getElementById("Frequency_Slider");
+        const volumeControl = document.querySelector(".volume-control");
+        const volumeValue = document.querySelector(".volume-value");
+        const panningControl = document.querySelector(".panning-control");
+        const panningValue = document.querySelector(".panning-value");
+
+        frequencySlider.addEventListener("input", () => {
+            const frequency = frequencySlider.value;
+            frequencyInput.value = frequency;
+            if (oscillator) oscillator.frequency.value = frequency;
+        });
+
+        frequencyInput.addEventListener("change", () => {
+            const frequency = frequencyInput.value;
+            frequencySlider.value = frequency;
+            if (oscillator) oscillator.frequency.value = frequency;
+        });
+
+        volumeControl.addEventListener("input", () => {
+            const volume = volumeControl.value;
+            volumeValue.textContent = `${Math.round(volume * 100)}%`;
+            if (gainNode) gainNode.gain.value = volume;
+        });
+
+        panningControl.addEventListener("input", () => {
+            const panning = panningControl.value;
+            panningValue.textContent = panning;
+            if (panner) panner.pan.value = panning;
+        });
+
+        function LeftSpeaker() {
+            if (panner) panner.pan.value = -1;
+            panningValue.textContent = "-1";
+        }
+
+        function CenterAudio() {
+            if (panner) panner.pan.value = 0;
+            panningValue.textContent = "0";
+        }
+
+        function RightSpeaker() {
+            if (panner) panner.pan.value = 1;
+            panningValue.textContent = "1";
+        }
+
+        function ChangeWaveformType(element) {
+            if (oscillator) oscillator.type = element.value;
+        }
+
+        function Play_Button() {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+            panner = audioContext.createStereoPanner();
+
+            oscillator.type = document.querySelector("input[name='waveformRadioButton']:checked").value;
+            oscillator.frequency.value = frequencySlider.value;
+            gainNode.gain.value = volumeControl.value;
+            panner.pan.value = panningControl.value;
+
+            oscillator.connect(gainNode);
+            gainNode.connect(panner);
+            panner.connect(audioContext.destination);
+
+            oscillator.start();
+        }
+
+        function Stop_Button() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator.disconnect();
+                gainNode.disconnect();
+                panner.disconnect();
+                audioContext.close();
+                audioContext = null;
+            }
+        }
+
+        function SetFrequencySlider(element) {
+            frequencySlider.value = element.value;
+            if (oscillator) oscillator.frequency.value = element.value;
+        }
+    </script>
+</body>
+
+</html>
