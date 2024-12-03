@@ -6,14 +6,14 @@
     <title>Frequency Level Chart</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-    <body style="
-    background-image: url('chart.jpg');
-    background-size: cover; 
-    background-position: center;
-    background-repeat: no-repeat;
-    height: 100vh; /* Ensures it covers the full viewport height */
-    margin: 0; /* Removes default body margins */
-    ">
+<body style="
+background-image: url('chart.jpg');
+background-size: cover; 
+background-position: center;
+background-repeat: no-repeat;
+height: 100vh; /* Ensures it covers the full viewport height */
+margin: 0; /* Removes default body margins */
+">
 
     <div class="container">
         <h1>Hearing Test Frequency and Level Chart</h1>
@@ -42,18 +42,42 @@
                 datasets: [{
                     label: 'Frequency vs Level',
                     data: [], // Frequency and corresponding level data
-                    borderColor: 'rgba(75, 192, 192, 1)', // Line color
+                    borderColor: 'black', // Line color in bold black
+                    borderWidth: 5, // Thicker line
                     fill: false,
                     tension: 0.1
                 }]
             },
             options: {
                 responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: {
+                                size: 16, // Font size for legend
+                                weight: 'bold' // Bold legend text
+                            },
+                            color: 'black' // Legend text color
+                        }
+                    }
+                },
                 scales: {
                     x: {
                         title: {
                             display: true,
-                            text: 'Frequency (Hz)'
+                            text: 'Frequency (Hz)',
+                            font: {
+                                size: 18,
+                                weight: 'bold' // Bold x-axis title
+                            },
+                            color: 'black' // X-axis title color
+                        },
+                        ticks: {
+                            font: {
+                                size: 16,
+                                weight: 'bold' // Bold x-axis tick labels
+                            },
+                            color: 'black' // X-axis tick labels color
                         },
                         min: 20,
                         max: 20000,
@@ -62,10 +86,22 @@
                     y: {
                         title: {
                             display: true,
-                            text: 'Level'
+                            text: 'Level',
+                            font: {
+                                size: 18,
+                                weight: 'bold' // Bold y-axis title
+                            },
+                            color: 'black' // Y-axis title color
+                        },
+                        ticks: {
+                            font: {
+                                size: 16,
+                                weight: 'bold' // Bold y-axis tick labels
+                            },
+                            color: 'black' // Y-axis tick labels color
                         },
                         min: 0,
-                        max: 100 // assuming a level range from 0 to 100
+                        max: 100 // Assuming a level range from 0 to 100
                     }
                 }
             }
